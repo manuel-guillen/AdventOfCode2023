@@ -1,4 +1,4 @@
-﻿// Part 1
+// Part 1
 // ========================
 int GetGameId(string game) => int.Parse(game[5..game.IndexOf(':')]);
 bool IsValidGame(string game) => game[(game.IndexOf(':') + 1)..].Split(';').All(IsValidRoll);
@@ -12,30 +12,20 @@ bool IsValidColorPile(string colorPile) => colorPile.Split(' ') switch
     _ => false
 };
 
-int result = File.ReadAllLines("input.txt").Where(IsValidGame).Select(GetGameId).Sum();
+int result = File.ReadLines("input.txt").Where(IsValidGame).Select(GetGameId).Sum();
 Console.WriteLine(result);
 
 // Part 2
 // ========================
 int GetSetPower((int, int, int) set) => set.Item1 * set.Item2 * set.Item3;
-(int, int, int) GetMinimumSet(string game) => game[(game.IndexOf(':') + 1)..].Split(';').Aggregate((1,1,1), UpdateMinSet);
-(int, int, int) UpdateMinSet((int, int, int) currentMinSet, string roll)
+(int, int, int) GetMinimumSet(string game) => game[(game.IndexOf(':') + 1)..].Split([';', ',']).Aggregate((1, 1, 1), UpdateMinSet);
+(int, int, int) UpdateMinSet((int, int, int) currentMinSet, string colorPile) => (currentMinSet, colorPile.Trim().Split(' ')) switch
 {
-    (int redCount, int greenCount, int blueCount) = currentMinSet;
-    foreach (string colorPile in roll.Split(',').Select(s => s.Trim()))
-    {
-        switch (colorPile.Split(' ')) {
-            case [string amount, "red"]:
-                redCount = Math.Max(redCount, int.Parse(amount));       break;
-            case [string amount, "green"]:
-                greenCount = Math.Max(greenCount, int.Parse(amount));   break;
-            case [string amount, "blue"]:
-                blueCount = Math.Max(blueCount, int.Parse(amount));     break;
-        }
-    };
+    ((int r, int g, int b), [string amount, "red"]) => (Math.Max(r, int.Parse(amount)), g, b),
+    ((int r, int g, int b), [string amount, "green"]) => (r, Math.Max(g, int.Parse(amount)), b),
+    ((int r, int g, int b), [string amount, "blue"]) => (r, g, Math.Max(b, int.Parse(amount))),
+    _ => throw new NotImplementedException(),
+};
 
-    return (redCount, greenCount, blueCount);
-}
-
-int result2 = File.ReadAllLines("input.txt").Select(_ => GetSetPower(GetMinimumSet(_))).Sum();
+int result2 = File.ReadLines("input.txt").Select(_ => GetSetPower(GetMinimumSet(_))).Sum();
 Console.WriteLine(result2);
