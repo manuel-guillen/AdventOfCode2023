@@ -4,21 +4,14 @@
 // ========================
 int ExtractValue(string line) => 10 * (line.First(Char.IsDigit) - '0') + line.Last(Char.IsDigit) - '0';
 
-int result = File.ReadAllLines("input.txt").Select(ExtractValue).Sum();
+int result = File.ReadLines("input.txt").Select(ExtractValue).Sum();
 Console.WriteLine(result);
 
 // Part 2
 // ========================
-static string Reverse(string s)
-{
-    char[] charArray = s.ToCharArray();
-    Array.Reverse(charArray);
-    return new string(charArray);
-}
-
-string digitPattern = @"one|two|three|four|five|six|seven|eight|nine|1|2|3|4|5|6|7|8|9|0";
-Regex forwardRegex = new Regex(digitPattern);
-Regex backwardRegex = new Regex(Reverse(digitPattern));
+string digitPattern = @"one|two|three|four|five|six|seven|eight|nine|\d";
+Regex firstInstanceRegex = new Regex($"^.*?({digitPattern})");
+Regex lastInstanceRegex = new Regex($"^.*({digitPattern})");
 
 int ExtractDigit(string s) => s switch
 {
@@ -36,10 +29,10 @@ int ExtractDigit(string s) => s switch
 
 int ExtractValue2(string line)
 {
-    string firstDigit = forwardRegex.Match(line).Value;
-    string lastDigit = Reverse(backwardRegex.Match(Reverse(line)).Value);
+    string firstDigit = firstInstanceRegex.Match(line).Groups[1].Value;
+    string lastDigit = lastInstanceRegex.Match(line).Groups[1].Value;
     return 10 * ExtractDigit(firstDigit) + ExtractDigit(lastDigit);
 }
 
-int result2 = File.ReadAllLines("input.txt").Select(ExtractValue2).Sum();
+int result2 = File.ReadLines("input.txt").Select(ExtractValue2).Sum();
 Console.WriteLine(result2);
