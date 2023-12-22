@@ -14,3 +14,28 @@ bool IsValidColorPile(string colorPile) => colorPile.Split(' ') switch
 
 int result = File.ReadAllLines("input.txt").Where(IsValidGame).Select(GetGameId).Sum();
 Console.WriteLine(result);
+
+// Part 2
+// ========================
+int GetSetPower((int, int, int) set) => set.Item1 * set.Item2 * set.Item3;
+(int, int, int) GetMinimumSet(string game) => game[(game.IndexOf(':') + 1)..].Split(';').Aggregate((1,1,1), UpdateMinSet);
+(int, int, int) UpdateMinSet((int, int, int) currentMinSet, string roll)
+{
+    (int redCount, int greenCount, int blueCount) = currentMinSet;
+    foreach (string colorPile in roll.Split(',').Select(s => s.Trim()))
+    {
+        switch (colorPile.Split(' ')) {
+            case [string amount, "red"]:
+                redCount = Math.Max(redCount, int.Parse(amount));       break;
+            case [string amount, "green"]:
+                greenCount = Math.Max(greenCount, int.Parse(amount));   break;
+            case [string amount, "blue"]:
+                blueCount = Math.Max(blueCount, int.Parse(amount));     break;
+        }
+    };
+
+    return (redCount, greenCount, blueCount);
+}
+
+int result2 = File.ReadAllLines("input.txt").Select(_ => GetSetPower(GetMinimumSet(_))).Sum();
+Console.WriteLine(result2);
