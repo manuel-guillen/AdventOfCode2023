@@ -1,4 +1,4 @@
-// Part 1
+﻿// Part 1
 // ========================
 static IEnumerable<uint[]> MapComposition(uint[][] f, uint[][] g)
 {
@@ -17,9 +17,9 @@ static IEnumerable<uint[]> MapComposition(uint[][] f, uint[][] g)
 
 static uint MapEval(uint n, uint[][] mapping, bool inverse = false)
 {
-    int i = inverse ? 1 : 0;
-    var range = mapping.FirstOrDefault(range => range[1-i] <= n && n - range[1-i] < range[2], [0, 0, 0]);
-    return range[i] + (n - range[1-i]);
+    (int source, int dest) = inverse ? (0,1) : (1,0);
+    var range = mapping.FirstOrDefault(range => range[source] <= n && n - range[source] < range[2], [0, 0, 0]);
+    return range[dest] + (n - range[source]);
 }
 
 Func<string,uint[]> ParseRow = row => row.Split(" ").Select(uint.Parse).ToArray();
@@ -30,3 +30,12 @@ uint[][] finalMap = input.Skip(1).Select(s => s.Split("\n").Select(ParseRow).ToA
 
 uint result = seeds.Select(n => MapEval(n, finalMap)).Min();
 Console.WriteLine(result);
+
+// Part 2
+// ========================
+var seedRanges = seeds.Chunk(2);
+var criticalPoints1 = seedRanges.Select(t => t[0]);
+var criticalPoints2 = finalMap.Select(r => r[1]).Where(n => seedRanges.Any(t => t[0] < n && n < t[0] + t[1]));
+
+uint result2 = criticalPoints1.Union(criticalPoints2).Select(n => MapEval(n, finalMap)).Min();
+Console.WriteLine(result2);
