@@ -1,18 +1,14 @@
 ﻿// Part 1
 // ========================
-static IEnumerable<uint[]> MapComposition(uint[][] f, uint[][] g)
+static uint[][] MapComposition(uint[][] f, uint[][] g)
 {
     var criticalPoints1 = f.SelectMany(r => new[] { r[1], r[1] + r[2] });
     var criticalPoints2 = g.SelectMany(r => new[] { r[1], r[1] + r[2] }).Select(n => MapEval(n, f, inverse: true));
-    var criticalPoints = criticalPoints1.Union(criticalPoints2).Order().SkipWhile(n => n == 0);
+    var criticalPoints = criticalPoints1.Union(criticalPoints2).Prepend((uint)0).Order().Distinct();
 
-    uint point = 0;
-    foreach (uint nextPoint in criticalPoints)
-    {
-        uint value = MapEval(MapEval(point, f), g);
-        if (value != point) yield return new[] { value, point, nextPoint - point };
-        point = nextPoint;
-    }
+    return criticalPoints.Zip(criticalPoints.Skip(1))
+        .Select(t => new uint[] { MapEval(MapEval(t.First, f), g), t.First, t.Second - t.First })
+        .Where(r => r[0] != r[1]).ToArray();
 }
 
 static uint MapEval(uint n, uint[][] mapping, bool inverse = false)
@@ -26,7 +22,7 @@ Func<string,uint[]> ParseRow = row => row.Split(" ").Select(uint.Parse).ToArray(
 
 var input = File.ReadAllText("input.txt").Trim().Split("\n\n").Select(s => s[(s.IndexOf(':') + 2)..]);
 uint[] seeds = ParseRow(input.First());
-uint[][] finalMap = input.Skip(1).Select(s => s.Split("\n").Select(ParseRow).ToArray()).Aggregate((f,g) => MapComposition(f,g).ToArray()).ToArray();
+uint[][] finalMap = input.Skip(1).Select(s => s.Split("\n").Select(ParseRow).ToArray()).Aggregate(MapComposition);
 
 uint result = seeds.Select(n => MapEval(n, finalMap)).Min();
 Console.WriteLine(result);
