@@ -30,3 +30,34 @@ while (expanding.Count != 0)
     expanding = expanding.SelectMany(t => ConnectedNodes(t, map)).Where(t => !visited.Contains(t)).ToHashSet();
 }
 Console.WriteLine(distance);
+
+// Part 2
+// ========================
+int count = 0;
+for (int r = 0; r < map.Length; r++)
+{
+    Position position = Position.Exterior;
+    for (int c = 0; c < map[r].Length; c++)
+    {
+        if (visited.Contains((r, c)))
+            position = (position, map[r][c]) switch
+            {
+                (Position.Exterior, '|') => Position.Interior,
+                (Position.Exterior, 'L') => Position.OnBoundaryInteriorOnLeft,
+                (Position.Exterior, 'F') => Position.OnBoundaryInteriorOnRight,
+                (Position.Interior, '|') => Position.Exterior,
+                (Position.Interior, 'L') => Position.OnBoundaryInteriorOnRight,
+                (Position.Interior, 'F') => Position.OnBoundaryInteriorOnLeft,
+                (Position.OnBoundaryInteriorOnLeft, 'J') => Position.Exterior,
+                (Position.OnBoundaryInteriorOnLeft, '7') => Position.Interior,
+                (Position.OnBoundaryInteriorOnRight, 'J') => Position.Interior,
+                (Position.OnBoundaryInteriorOnRight, '7') => Position.Exterior,
+                (_, '-') or (_, 'S') /* For our map S is - */ => position,
+            };
+        else if (position == Position.Interior)
+            count += 1;
+    }
+}
+Console.WriteLine(count);
+
+enum Position { Interior, Exterior, OnBoundaryInteriorOnLeft, OnBoundaryInteriorOnRight };
