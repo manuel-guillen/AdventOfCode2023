@@ -1,7 +1,7 @@
 ﻿// Part 1
 // ========================
-bool ConnectsNorth(char c) => c == 'S' || c == '|' || c == 'L' || c == 'J';
-bool ConnectsSouth(char c) => c == 'S' || c == '|' || c == '7' || c == 'F';
+bool ConnectsNorth(char c) => c == '|' || c == 'L' || c == 'J';
+bool ConnectsSouth(char c) => c == '|' || c == '7' || c == 'F';
 bool ConnectsWest(char c) => c == 'S' || c == '-' || c == 'J' || c == '7';
 bool ConnectsEast(char c) => c == 'S' || c == '-' || c == 'L' || c == 'F';
 
@@ -19,13 +19,12 @@ IEnumerable<(int r, int c)> ConnectedNodes((int r, int c) t, char[][] map)
 }
 
 char[][] map = File.ReadLines("input.txt").Select(s => s.ToCharArray()).ToArray();
-
 HashSet<(int r, int c)> expanding = map.Select((row, r) => (row, r)).Where(t => t.row.Contains('S')).Select(t => (t.r, Array.IndexOf(t.row, 'S'))).ToHashSet(),
                         visited = [];
 int distance = -1;
 while (expanding.Count != 0)
 {
-    distance += 1;
+    distance++;
     visited.UnionWith(expanding);
     expanding = expanding.SelectMany(t => ConnectedNodes(t, map)).Where(t => !visited.Contains(t)).ToHashSet();
 }
@@ -52,10 +51,10 @@ for (int r = 0; r < map.Length; r++)
                 (Position.OnBoundaryInteriorOnLeft, '7') => Position.Interior,
                 (Position.OnBoundaryInteriorOnRight, 'J') => Position.Interior,
                 (Position.OnBoundaryInteriorOnRight, '7') => Position.Exterior,
-                (_, '-') or (_, 'S') /* For our map S is - */ => position,
+                (_, '-') or (_, 'S') => position,
             };
         else if (position == Position.Interior)
-            count += 1;
+            count++;
     }
 }
 Console.WriteLine(count);
